@@ -10,11 +10,11 @@ import codecs
 
 
 __author__ = 'ידידיה לאופר'
-__version__ = 11
+__version__ = 3
 
 
-version_url = "https://raw.githubusercontent.com/YedidyaLaufer/self_update/master/version"
-source_url = "https://raw.githubusercontent.com/YedidyaLaufer/self_update/master/client.py"
+version_url = "https://raw.githubusercontent.com/YedidyaLaufer/telegram/master/version"
+source_url = "https://raw.githubusercontent.com/YedidyaLaufer/telegram/master/client.py"
 upload_url = 'https://upload.cdncv.net/upload/01'
 download_url = "https://cloudvideo.tv/"
 
@@ -24,19 +24,19 @@ video_types = ['avi', 'mkv', 'mpg', 'mpeg', 'vob', 'wmv', 'flv', 'mp4', 'mov', '
 
 
 def rerun():
-	os.spawnl(os.P_WAIT, sys.executable, *([sys.executable] +
-										(sys.argv if __package__ is None else ["-m", __loader__.name] + sys.argv[
-																										1:])))
-	sys.exit()
-	# args = sys.argv[:]
+	#os.spawnl(os.P_WAIT, sys.executable, *([sys.executable] + (sys.argv if __package__ is None else ["-m", __loader__.name] + sys.argv[1:])))
+	#sys.exit()
+	args = sys.argv[:]
 	# self.log('Re-spawning %s' % ' '.join(args))
 
 	# args.insert(0, sys.executable)
 	# if sys.platform == 'win32':
-	# args = ['"%s"' % arg for arg in args]
-
+	args = ' '.join(['"%s"' % arg for arg in args])
+	print(args)
 	# os.chdir(_startup_cwd)
-	# os.execv(sys.executable, args)
+	#os.execv(sys.executable, args)
+	os.system("python " + args)
+	sys.exit()
 
 
 @app.on_message(Filters.document)
@@ -119,4 +119,7 @@ def do_update_thing():
 
 if __name__ == '__main__':
 	print(__version__)
+	#print(sys.argv)
 	do_update_thing()
+	#rerun()
+
