@@ -118,4 +118,5 @@ def do_update_thing():
 
 
 if __name__ == '__main__':
+	print(__version__)
 	do_update_thing()
