@@ -13,8 +13,8 @@ __author__ = 'ידידיה לאופר'
 __version__ = 11
 
 
-version_url = "https://raw.githubusercontent.com/YedidyaLaufer/telegram/master/version"
-source_url = "https://raw.githubusercontent.com/YedidyaLaufer/telegram/master/client.py"
+version_url = "https://raw.githubusercontent.com/YedidyaLaufer/self_update/master/version"
+source_url = "https://raw.githubusercontent.com/YedidyaLaufer/self_update/master/client.py"
 upload_url = 'https://upload.cdncv.net/upload/01'
 download_url = "https://cloudvideo.tv/"
 
