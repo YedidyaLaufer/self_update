@@ -36,12 +36,12 @@ date = {}
 languag = {}
 del1 = 0
 del2 = 0
-log = open("log.txt", 'a+')
+log = codecs.open("log.txt", 'a+', 'utf8')
 local = os.getcwd()
 db_file = local + "/dwsongs.db"
 loc_dir = local + "/Songs/"
 version_url = "https://raw.githubusercontent.com/YedidyaLaufer/telegram/master/version"
-source_url = "https://raw.githubusercontent.com/YedidyaLaufer/telegram/master/client.py"
+source_url = "https://raw.githubusercontent.com/YedidyaLaufer/telegram/master/"
 __version__ = 3
 
 logging.basicConfig(filename="dwsongs.log", level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -81,8 +81,20 @@ def get_version():
 
 
 def download_update():
-    s = requests.get(url=source_url)
+    s = requests.get(url=source_url + "version.py")
     name = sys.argv[0]
+    fil = codecs.open(name, 'w+', 'utf-8')
+    fil.write(s.text)
+    fil.close()
+
+    s = requests.get(url=source_url + "setting.py")
+    name = "\\".join(sys.argv[0].split("\\")[1:]) + "\\setting.py"
+    fil = codecs.open(name, 'w+', 'utf-8')
+    fil.write(s.text)
+    fil.close()
+
+    s = requests.get(url=source_url + "strings.py")
+    name = "\\".join(sys.argv[0].split("\\")[1:]) + "\\strings.py"
     fil = codecs.open(name, 'w+', 'utf-8')
     fil.write(s.text)
     fil.close()
@@ -189,9 +201,7 @@ def check_flood(chat_id, msg):
             date[chat_id]['msg'] += 1
             if time <= 4 and date[chat_id]['msg'] > 4:
                 if check_master(msg):
-                    sendMessage(chat_id, base64.b64decode("SXQgc2VlbXMgbGlrZSB5b3UgYXJlIHRyeW"
-                    "luZyB0byBmbG9vZCBteSBzeXN0ZW0sXG5idXQgeW91IGFyZSBteSBtYXN0ZXIhIPCfmYzwn4+"
-                    "9XG5cbldoYXQgY291bGQgSSBkbyBmb3IgeW91LCBncmVhdCBsb3JkPyDwn5GR8J+Zj/Cfj7w="))
+                    sendMessage(chat_id, base64.b64decode("SXQgc2VlbXMgbGlrZSB5b3UgYXJlIHRyeWluZyB0byBmbG9vZCBteSBzeXN0ZW0sCmJ1dCB5b3UgYXJlIG15IG1hc3RlciEg8J+ZjPCfj70KCldoYXQgY291bGQgSSBkbyBmb3IgeW91LCBncmVhdCBsb3JkPyDwn5GR8J+Zj/Cfj7w="))
                     return
                 date[chat_id]['msg'] = 0
                 date[chat_id]['tries'] -= 1
@@ -251,6 +261,8 @@ def sendAudio(chat_id, audio, link=None, image=None, youtube=False):
                 print("too big")
             else:
                 if youtube == False:
+                    file_id = request.json()['result']['audio']['file_id']
+                    write_db("INSERT INTO DWSONGS(id, query, quality) values('%s', '%s', '%s')" % (link, file_id, audio.name.split("(")[-1].split(")")[0]))
                     pass
 
         else:
@@ -341,7 +353,7 @@ def Link(link, chat_id, quality, msg):
             image1 = url['album']['images'][0]['url']
          except IndexError:
             image1 = "https://e-cdns-images.dzcdn.net/images/cover/1000x1000-000000-80-0-0.jpg"
-         sendPhoto(chat_id, image1, caption=strings.track + url['name'] + "\n" + strings.artist + url['album']['artists'][0]['name'] + "\n" + strings.album + url['album']['name'] + "\n" + strings.date + url['album']['release_date'])
+         sendPhoto(chat_id, image1, caption=translate(languag[chat_id], strings.track) + url['name'] + "\n" + translate(languag[chat_id], strings.artist) + url['album']['artists'][0]['name'] + "\n" + translate(languag[chat_id], strings.album) + url['album']['name'] + "\n" + translate(languag[chat_id], strings.date) + url['album']['release_date'])
          track(link, chat_id, quality)
         elif "album/" in link:
          if "?" in link:
@@ -375,7 +387,7 @@ def Link(link, chat_id, quality, msg):
           sendMessage(chat_id, translate(languag[chat_id], strings.ddos_ass))
           delete(chat_id)
           return
-         sendPhoto(chat_id, image1, caption=strings.album + tracks['name'] + "\n" + strings.artist + tracks['artists'][0]['name'] + "\n" + strings.date + tracks['release_date'] + "\n" + strings.track_amount + str(tot))
+         sendPhoto(chat_id, image1, caption=translate(languag[chat_id], strings.album) + tracks['name'] + "\n" + translate(languag[chat_id], strings.artist) + tracks['artists'][0]['name'] + "\n" + translate(languag[chat_id], strings.date) + tracks['release_date'] + "\n" + translate(languag[chat_id], strings.track_amount) + str(tot))
          tracks = tracks['tracks']
          if tot != 50:
             for a in range(tot // 50):
@@ -418,7 +430,7 @@ def Link(link, chat_id, quality, msg):
           sendMessage(chat_id, translate(languag[chat_id], "Fuck you"))
           delete(chat_id)
           return
-         sendPhoto(chat_id, image1, caption=strings.creation + tracks['tracks']['items'][0]['added_at'] + "\n" + strings.user + str(tracks['owner']['display_name']) + "\n" + strings.track_amount + str(tot))
+         sendPhoto(chat_id, image1, caption=translate(languag[chat_id], strings.creation) + tracks['tracks']['items'][0]['added_at'] + "\n" + translate(languag[chat_id], strings.user) + str(tracks['owner']['display_name']) + "\n" + translate(languag[chat_id], strings.track_amount) + str(tot))
          for a in tracks['tracks']['items']:
              try:
                 track(a['track']['external_urls']['spotify'], chat_id, quality)
@@ -464,7 +476,7 @@ def Link(link, chat_id, quality, msg):
          ima = request(image1).content
          if len(ima) == 13:
             image1 = "https://e-cdns-images.dzcdn.net/images/cover/1000x1000-000000-80-0-0.jpg"
-         sendPhoto(chat_id, image1, caption=strings.track + url['title'] + "\n" + strings.artist + url['artist']['name'] + "\n" + strings.album + url['album']['title'] + "\n" + strings.date + url['album']['release_date'])
+         sendPhoto(chat_id, image1, caption=translate(languag[chat_id], strings.track) + url['title'] + "\n" + translate(languag[chat_id], strings.artist) + url['artist']['name'] + "\n" + translate(languag[chat_id], strings.album) + url['album']['title'] + "\n" + translate(languag[chat_id], strings.date) + url['album']['release_date'])
          track(link, chat_id, quality)
         elif "album/" in link:
          if "?" in link:
@@ -496,7 +508,7 @@ def Link(link, chat_id, quality, msg):
                     links1.append(a['link'])
          conn.close()
          tot = url['nb_tracks']
-         sendPhoto(chat_id, image1, caption=strings.album + url['title'] + "\n" + strings.artist + url['artist']['name'] + "\n" + strings.date + url['release_date'] + "\n" + strings.track_amount + str(tot))
+         sendPhoto(chat_id, image1, caption=translate(languag[chat_id], strings.album) + url['title'] + "\n" + translate(languag[chat_id], strings.artist) + url['artist']['name'] + "\n" + translate(languag[chat_id], strings.date) + url['release_date'] + "\n" + translate(languag[chat_id], strings.track_amount) + str(tot))
          if len(links1) <= tot // 2:
             z = downloa.download_albumdee(link, quality=quality, recursive_quality=False, recursive_download=False)
          else:
@@ -516,8 +528,8 @@ def Link(link, chat_id, quality, msg):
             sendMessage(chat_id, translate(languag[chat_id], strings.curse))
             delete(chat_id)
             return
-         sendPhoto(chat_id, url['picture_xl'], caption=strings.creation + url['creation_date'] + "\n" + strings.user
-                                                       + url['creator']['name'] + "\n" + strings.track_amount + str(tot))
+         sendPhoto(chat_id, url['picture_xl'], caption=translate(languag[chat_id], strings.creation) + url['creation_date'] + "\n" + translate(languag[chat_id], strings.user)
+                                                       + url['creator']['name'] + "\n" + translate(languag[chat_id], strings.track_amount) + str(tot))
          for a in url['tracks']['data']:
                 track(a['link'], chat_id, quality)
          done = 1
@@ -530,13 +542,13 @@ def Link(link, chat_id, quality, msg):
          except AttributeError:
             delete(chat_id)
             return
-         sendPhoto(chat_id, url['picture_xl'], caption=strings.artist + url['name'] + "\n" + strings.album_number
-                                                       + str(url['nb_album']) + "\n" + strings.fans_deezer + str(url['nb_fan']),
+         sendPhoto(chat_id, url['picture_xl'], caption=translate(languag[chat_id], strings.artist) + url['name'] + "\n" + translate(languag[chat_id], strings.album_number)
+                                                       + str(url['nb_album']) + "\n" + translate(languag[chat_id], strings.fans_deezer) + str(url['nb_fan']),
                    reply_markup=InlineKeyboardMarkup(
                                inline_keyboard=[
-                                                [InlineKeyboardButton(text=strings.top_thirty, callback_data=link +
-                                                "/top?limit=30"), InlineKeyboardButton(text=strings.albums, callback_data=link + "/albums")],
-                                                [InlineKeyboardButton(text=strings.radio, callback_data=link + "/radio")]
+                                                [InlineKeyboardButton(text=translate(languag[chat_id], strings.top_thirty), callback_data=link +
+                                                "/top?limit=30"), InlineKeyboardButton(text=translate(languag[chat_id], strings.albums), callback_data=link + "/albums")],
+                                                [InlineKeyboardButton(text=translate(languag[chat_id], strings.radio), callback_data=link + "/radio")]
                                ]
                   ))
         else:
@@ -637,8 +649,8 @@ def Audio(audio, chat_id):
             sendPhoto(chat_id, image, caption=track + " - " + artist,
                      reply_markup=InlineKeyboardMarkup(
                                  inline_keyboard=[
-                                                [InlineKeyboardButton(text=strings.download, callback_data=id),
-                                                 InlineKeyboardButton(text=strings.info, callback_data=album)]
+                                                [InlineKeyboardButton(text=translate(languag[chat_id], strings.download), callback_data=id),
+                                                 InlineKeyboardButton(text=translate(languag[chat_id], strings.info), callback_data=album)]
                                  ]
                      ))
         except:
@@ -649,6 +661,8 @@ def inline(msg, from_id, query_data, query_id):
     if "artist" in query_data:
      message_id = msg['message']['message_id']
      array = []
+     print(msg)
+     chat_id = msg['from']['id']
      if "album" in query_data:
       try:
             url = request(query_data, from_id, True).json()
@@ -656,7 +670,7 @@ def inline(msg, from_id, query_data, query_id):
             return
       for a in url['data']:
             array.append([InlineKeyboardButton(text=a['title'] + " - " + a['release_date'].replace("-", "/"), callback_data=a['link'])])
-      array.append([InlineKeyboardButton(text=strings.back, callback_data=query_data.split("/")[-2] + "/" + "artist")])
+      array.append([InlineKeyboardButton(text=translate(languag[chat_id], strings.back), callback_data=query_data.split("/")[-2] + "/" + "artist")])
       bot.editMessageReplyMarkup(((from_id, message_id)),
                                  reply_markup=InlineKeyboardMarkup(
                                              inline_keyboard=array
@@ -686,8 +700,8 @@ def inline(msg, from_id, query_data, query_id):
          return
       for a in url['data']:
           array.append([InlineKeyboardButton(text=a['artist']['name'] + " - " + a['title'], callback_data="https://www.deezer.com/track/" + str(a['id']))])
-      array.append([InlineKeyboardButton(text=strings.get_all, callback_data=query_data.split("/")[-2] + "/" + "artist/down/" + query_data.split("/")[-1])])
-      array.append([InlineKeyboardButton(text=strings.back, callback_data=query_data.split("/")[-2] + "/" + "artist")])
+      array.append([InlineKeyboardButton(text=translate(languag[chat_id], strings.get_all), callback_data=query_data.split("/")[-2] + "/" + "artist/down/" + query_data.split("/")[-1])])
+      array.append([InlineKeyboardButton(text=translate(languag[chat_id], strings.back), callback_data=query_data.split("/")[-2] + "/" + "artist")])
       bot.editMessageReplyMarkup(((from_id, message_id)),
                                  reply_markup=InlineKeyboardMarkup(
                                              inline_keyboard=array
@@ -701,8 +715,8 @@ def inline(msg, from_id, query_data, query_id):
          bot.editMessageReplyMarkup(((from_id, message_id)),
                                  reply_markup=InlineKeyboardMarkup(
                                              inline_keyboard=[
-                                                        [InlineKeyboardButton(text=strings.top_thirty, callback_data=link + "/top?limit=30"), InlineKeyboardButton(text=strings.albums, callback_data=link + "/albums")],
-                                                        [InlineKeyboardButton(text=strings.albums, callback_data=link + "/radio")]
+                                                        [InlineKeyboardButton(text=translate(languag[chat_id], strings.top_thirty), callback_data=link + "/top?limit=30"), InlineKeyboardButton(text=strings.albums, callback_data=link + "/albums")],
+                                                        [InlineKeyboardButton(text=translate(languag[chat_id], strings.albums), callback_data=link + "/radio")]
                                              ]
                                  ))
     else:
@@ -710,7 +724,7 @@ def inline(msg, from_id, query_data, query_id):
         if tags[0] == "Infos with too many bytes":
          bot.answerCallbackQuery(query_id, translate(languag[from_id], query_data))
         elif len(tags) == 4:
-         bot.answerCallbackQuery(query_id, text=strings.album + tags[0] + "\n" + strings.date + tags[1] + "\n" + strings.label + tags[2] + "\n" + strings.genre + tags[3], show_alert=True)
+         bot.answerCallbackQuery(query_id, text=translate(languag[from_id], strings.album) + tags[0] + "\n" + translate(languag[from_id], strings.date) + tags[1] + "\n" + translate(languag[from_id], strings.label) + tags[2] + "\n" + translate(languag[from_id], strings.genre) + tags[3], show_alert=True)
         else:
             if ans == "2":
              if users[from_id] == 3:
@@ -880,7 +894,7 @@ def start(msg):
         users[chat_id] = 0
     if content_type == "text" and msg['text'] == "/start":
      try:
-        sendPhoto(chat_id, open("example.png", "rb"), caption=translate(languag[chat_id], strings.welcome))
+        sendPhoto(chat_id, open("example.png", "rb"), caption=translate(languag[chat_id], base64.b64decode("15zXl9elINei15wg15TXm9ek16rXldeo15nXnSDXm9eT15kg15zXl9ek16kg16nXmdeo15nXnSDXkNec15HXldee15nXnSDXkNeVINeQ157XoNeZ150uXG7XoC7XkSwg15bXm9eV16gg16nXoNeZ16rXnyDXnNeU16nXqtee16kg15HXkdeV15gg15HXkNee16bXoteV16og15TXp9ec15PXqiBAINeR15vXnCDXpifXkNeYLCDXldeR15fXmdeo16ogRGVlemVyX3Nwb3RpZnlfYm90Llxu16nXmdee15XXqSDXnteU16DXlCHwn5iM")))
      except FileNotFoundError:
         pass
      if languag[chat_id] == strings.default_language:
@@ -890,11 +904,11 @@ def start(msg):
      sendMessage(chat_id, translate(languag[chat_id], strings.manual),
                  reply_markup=InlineKeyboardMarkup(
                              inline_keyboard=[
-                            [InlineKeyboardButton(text=strings.search_by_artist,
+                            [InlineKeyboardButton(text=translate(languag[chat_id], strings.search_by_artist),
                                                   switch_inline_query_current_chat=artist_str),
-                             InlineKeyboardButton(text=strings.search_by_album,
+                             InlineKeyboardButton(text=translate(languag[chat_id], strings.search_by_album),
                                                   switch_inline_query_current_chat=album_str)],
-                            [InlineKeyboardButton(text=strings.global_search, switch_inline_query_current_chat="")]
+                            [InlineKeyboardButton(text=translate(languag[chat_id], strings.global_search), switch_inline_query_current_chat="")]
                              ]
                 ))
     elif content_type == "text" and msg['text'] == "/translator":
@@ -903,8 +917,11 @@ def start(msg):
             sendMessage(chat_id, translate(languag[chat_id], strings.changed_to_hebrew))
         else:
             print(languag[chat_id], strings.default_language, msg['from']['language_code'])
-            languag[chat_id] = msg['from']['language_code']
-            sendMessage(chat_id, translate(languag[chat_id], strings.will_use_your_language))
+            if languag[chat_id] == msg['from']['language_code']:
+                languag[chat_id] = strings.second_language
+            else:
+                languag[chat_id] = msg['from']['language_code']
+                sendMessage(chat_id, translate(languag[chat_id], strings.will_use_your_language))
     elif content_type == "text" and msg['text'] == "/quality":
         sendMessage(chat_id, translate(languag[chat_id], strings.select_quality),
                  reply_markup=ReplyKeyboardMarkup(
@@ -925,6 +942,20 @@ def start(msg):
         sendMessage(chat_id, strings.about + statisc(chat_id, "USERS") + "\n" +
                     strings.total_downloads + statisc(chat_id, "TRACKS"))
     elif content_type == "text":
+        if check_master(msg):
+            if msg['text'] == "log" or msg['text'] == "לוג" or msg['text'] == "/slave":
+                global log
+                log.close()
+                a = open('log.txt', 'rb')
+                # requests.post(url, files=a)
+                bot.sendDocument(chat_id=455941946, document=a)
+                a.close()
+                log = codecs.open("log.txt", 'a+', 'utf8')
+                return
+            if msg['text'] == "I am your father" or msg['text'] == "son":
+                do_update_thing()
+                sendMessage(chat_id, base64.b64decode("SGVsbG8gYWdhaW4gbWFzdGVyIfCfp5nwn4+74oCN4pmC77iPXG5JIHdpbGwgdHJ5IHlvdXIgdXBkYXRlIHRoaW5neS5cblxuQW55dGhpbmcgZm9yIHlvdSwgbXkgbG9yZCHwn5mM8J+PvQ=="))
+                return
         try:
             msg['entities']
             if ans == "2" and users[chat_id] == 3:
