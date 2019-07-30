@@ -51,13 +51,14 @@ song_donloading = "השיר מורד"
 
 n_tracks = "מס' שירים:"
 welcome = "ברוכים הבאים ל@Deezer_spotify_bot\nליחצו על '/' כדי לראות את רשימת הפקודות"
-manual = "לחץ על הכפתורים כדי לחפש שירים אלבומים או אמנים.\nנ.ב, זכור שניתן להשתמש בבוט באמצעות הקלדת @ בכל צ'אט, ובחירת Deezer_spotify_bot.\nשימוש מהנה!😌"
+manual = "לחץ על הכפתורים כדי לחפש שירים אלבומים או אמנים.\nזכור שניתן להשתמש בבוט באמצעות הקלדת @ בכל צ'אט, ובחירת Deezer_spotify_bot.\nשימוש מהנה!😌"
 search_by_artist = "חיפוש לפי אמן"
 search_by_album = "חיפוש לפי אלבום"
 global_search = "חיפוש כללי"
 
 changed_to_hebrew = "השפה הוגדה לעברית"
 will_use_your_language = "הבוט ישתמש מעכשיו בשפת אפליקציית הטלגרם שלך"
+will_use_english = "The bot will use now English"
 select_quality = "בחר איכות הורדה כברירת מחדל"
 
 flac = "FLAC"  # Do NOT TOUCH!
@@ -67,7 +68,7 @@ kb_128 = "MP3_128Kbps"  # Do NOT TOUCH!
 
 
 will_download_in_quality = "השירים יורדו באיכות "
-best_quality_available = "שירים שלא יוכלו לרדת באיכות שההגדרת, יורדו בריכות הטובה ביותר האפשרית"
+best_quality_available = "שירים שלא יוכלו לרדת באיכות שהגדרת, יורדו באיכות הטובה ביותר האפשרית"
 
 
 about = "גרסה: 1.3 Laufer\nשם: @Deezer_spotify_bot\nיוצר: @Yedidya012\nמשתמשים: "
@@ -76,6 +77,7 @@ total_downloads = 'סה"כ הורדות: '
 press = "לחץ"
 
 default_language = "he"  # leave in english
+second_language = "en"
 
 inline_kboard_album = "אלבום:"
 inline_kboard_artist = "אמן:"
