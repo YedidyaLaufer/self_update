@@ -27,6 +27,7 @@ from telepot.namedtuple import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboar
     InlineKeyboardButton, InlineQueryResultArticle, InputTextMessageContent
 import strings
 from setting import *
+#aa = open("example.png", "rb")
 downloa = deezloader.Login(setting.username, setting.password, setting.deezer_token)
 token = setting.token
 bot = telepot.Bot(token)
@@ -247,14 +248,28 @@ def sendAudio(chat_id, audio, link=None, image=None, youtube=False):
             audio = open(audio, "rb")
             try:
                 tag = EasyID3(audio.name)
+                duration = int(MP3(audio.name).info.length)
             except mutagen.id3._util.ID3NoHeaderError:
                 tag = FLAC(audio.name)
-
+                duration = int(tag.info.length)
+            data = {
+                "chat_id": chat_id,
+                "duration": duration,
+                "performer": tag['artist'][0],
+                "title": tag['title'][0]
+                }
+            file = {
+                "audio": audio,
+                "thumb": image
+            }
+            url = "https://api.telegram.org/bot" + token + "/sendAudio"
             try:
-                response = bot.sendAudio(chat_id, audio)
+                request = requests.post(url, params=data, files=file, timeout=20)
+                #response = bot.sendAudio(chat_id, audio)
             except:
-                response = bot.sendAudio(chat_id, audio)
-            if response is None:
+                request = requests.post(url, params=data, files=file, timeout=20)
+                #response = bot.sendAudio(chat_id, audio)
+            if request.status_code != 200:
                 print(str(response))
                 sendMessage(chat_id, translate(languag[chat_id], strings.the_song + tag['artist'][0]
                                                + " - " + tag['title'][0] + strings.too_big))
@@ -894,8 +909,11 @@ def start(msg):
         users[chat_id] = 0
     if content_type == "text" and msg['text'] == "/start":
      try:
-        sendPhoto(chat_id, open("example.png", "rb"), caption=translate(languag[chat_id], base64.b64decode("15zXl9elINei15wg15TXm9ek16rXldeo15nXnSDXm9eT15kg15zXl9ek16kg16nXmdeo15nXnSDXkNec15HXldee15nXnSDXkNeVINeQ157XoNeZ150uXG7XoC7XkSwg15bXm9eV16gg16nXoNeZ16rXnyDXnNeU16nXqtee16kg15HXkdeV15gg15HXkNee16bXoteV16og15TXp9ec15PXqiBAINeR15vXnCDXpifXkNeYLCDXldeR15fXmdeo16ogRGVlemVyX3Nwb3RpZnlfYm90Llxu16nXmdee15XXqSDXnteU16DXlCHwn5iM")))
+        sendPhoto(chat_id, open("example.png", "rb"), caption=translate(languag[chat_id], """ברוכים הבאים אל @Deezer_spotify_bot
+ליחצו על '/' כדי לקבל את רשימת הפקודות.
+תהנו!!😃"""))
      except FileNotFoundError:
+        print("no file found")
         pass
      if languag[chat_id] == strings.default_language:
          artist_str, album_str = strings.inline_kboard_artist, strings.inline_kboard_album
@@ -911,7 +929,7 @@ def start(msg):
                             [InlineKeyboardButton(text=translate(languag[chat_id], strings.global_search), switch_inline_query_current_chat="")]
                              ]
                 ))
-    elif content_type == "text" and msg['text'] == "/translator":
+    elif content_type == "text" and msg['text'] == "/translate":
         if languag[chat_id] != strings.default_language:
             languag[chat_id] = strings.default_language
             sendMessage(chat_id, translate(languag[chat_id], strings.changed_to_hebrew))
@@ -919,6 +937,7 @@ def start(msg):
             print(languag[chat_id], strings.default_language, msg['from']['language_code'])
             if languag[chat_id] == msg['from']['language_code']:
                 languag[chat_id] = strings.second_language
+                sendMessage(chat_id, translate(languag[chat_id], strings.will_use_english))
             else:
                 languag[chat_id] = msg['from']['language_code']
                 sendMessage(chat_id, translate(languag[chat_id], strings.will_use_your_language))
@@ -972,11 +991,11 @@ def start(msg):
             sendMessage(chat_id, translate(languag[chat_id], strings.press),
                     reply_markup=InlineKeyboardMarkup(
                                 inline_keyboard=[
-                                               [InlineKeyboardButton(text=strings.search_by_artist,
+                                               [InlineKeyboardButton(text=translate(languag[chat_id], strings.search_by_artist),
                                                                      switch_inline_query_current_chat=artist_str + msg['text']),
-                                                InlineKeyboardButton(text=strings.search_by_album,
+                                                InlineKeyboardButton(text=translate(languag[chat_id], strings.search_by_album),
                                                                      switch_inline_query_current_chat=album_str + msg['text'])],
-                                               [InlineKeyboardButton(text=strings.global_search,
+                                               [InlineKeyboardButton(text=translate(languag[chat_id], strings.global_search),
                                                                      switch_inline_query_current_chat=msg['text'])]
                                 ]
                    ))
