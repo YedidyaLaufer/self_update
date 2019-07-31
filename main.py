@@ -253,7 +253,7 @@ def sendAudio(chat_id, audio, link=None, image=None, youtube=False):
                 tag = FLAC(audio.name)
                 duration = int(tag.info.length)
             data = {
-                "chat_id": chat_id,
+                "chat_id": "@deezer_spotify",#chat_id,
                 "duration": duration,
                 "performer": tag['artist'][0],
                 "title": tag['title'][0]
@@ -270,13 +270,14 @@ def sendAudio(chat_id, audio, link=None, image=None, youtube=False):
                 request = requests.post(url, params=data, files=file, timeout=20)
                 #response = bot.sendAudio(chat_id, audio)
             if request.status_code != 200:
-                print(str(response))
+                #print(str(response))
                 sendMessage(chat_id, translate(languag[chat_id], strings.the_song + tag['artist'][0]
                                                + " - " + tag['title'][0] + strings.too_big))
                 print("too big")
             else:
                 if youtube == False:
                     file_id = request.json()['result']['audio']['file_id']
+                    bot.sendAudio(chat_id, file_id)
                     write_db("INSERT INTO DWSONGS(id, query, quality) values('%s', '%s', '%s')" % (link, file_id, audio.name.split("(")[-1].split(")")[0]))
                     pass
 
@@ -297,6 +298,7 @@ def track(link, chat_id, quality):
     match = c.fetchone()
     conn.close()
     if match != None:
+        #print(match[0], type(match[0]))
         sendAudio(chat_id, match[0])
     else:
         try:
