@@ -27,6 +27,7 @@ from telepot.namedtuple import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboar
     InlineKeyboardButton, InlineQueryResultArticle, InputTextMessageContent
 import strings
 from setting import *
+#aa = open("example.png", "rb")
 downloa = deezloader.Login(setting.username, setting.password, setting.deezer_token)
 token = setting.token
 bot = telepot.Bot(token)
@@ -77,12 +78,17 @@ def get_language_from_db():
 		
     
 def change_lan(chat_id, language):
-    conn = sqlite3.connect(db_file)
-    c = conn.cursor()
+    print("got here")
+    return
+    try:
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
     #c.execute("SELECT chat_id FROM CHAT_LAN where chat_id = '{0}'".format(chat_id))
     #if c.fetchone() == None:
-    write_db("INSERT INTO CHAT_LAN(chat_id, language) values('{0}', '{1}')".format(chat_id, language))
+        write_db("INSERT INTO CHAT_LAN(chat_id, language) values('{0}', '{1}')".format(chat_id, language))
     #c.execute("SELECT chat_id FROM CHAT_ID")
+    except:
+        pass
 
 
 def rerun():
@@ -266,21 +272,36 @@ def sendAudio(chat_id, audio, link=None, image=None, youtube=False):
             audio = open(audio, "rb")
             try:
                 tag = EasyID3(audio.name)
+                duration = int(MP3(audio.name).info.length)
             except mutagen.id3._util.ID3NoHeaderError:
                 tag = FLAC(audio.name)
-
+                duration = int(tag.info.length)
+            data = {
+                "chat_id": "@deezer_spotify",#chat_id,
+                "duration": duration,
+                "performer": tag['artist'][0],
+                "title": tag['title'][0]
+                }
+            file = {
+                "audio": audio,
+                "thumb": image
+            }
+            url = "https://api.telegram.org/bot" + token + "/sendAudio"
             try:
-                response = bot.sendAudio(chat_id, audio)
+                request = requests.post(url, params=data, files=file, timeout=20)
+                #response = bot.sendAudio(chat_id, audio)
             except:
-                response = bot.sendAudio(chat_id, audio)
-            if response is None:
-                print(str(response))
+                request = requests.post(url, params=data, files=file, timeout=20)
+                #response = bot.sendAudio(chat_id, audio)
+            if request.status_code != 200:
+                #print(str(response))
                 sendMessage(chat_id, translate(languag[chat_id], strings.the_song + tag['artist'][0]
                                                + " - " + tag['title'][0] + strings.too_big))
                 print("too big")
             else:
                 if youtube == False:
                     file_id = request.json()['result']['audio']['file_id']
+                    bot.sendAudio(chat_id, file_id)
                     write_db("INSERT INTO DWSONGS(id, query, quality) values('%s', '%s', '%s')" % (link, file_id, audio.name.split("(")[-1].split(")")[0]))
                     pass
 
@@ -301,6 +322,7 @@ def track(link, chat_id, quality):
     match = c.fetchone()
     conn.close()
     if match != None:
+        #print(match[0], type(match[0]))
         sendAudio(chat_id, match[0])
     else:
         try:
@@ -870,11 +892,7 @@ def hijack_the_pony(msg):
         username = msg['from']['username']
     if 'last_name' in msg['from']:
         last_name = msg['from']['last_name']
-    try:
-        msg['text']
-        log.write("Name: {0} {1}\nUsername: {2}\nText: {3}\nTime: {4}\n\n".format(msg['from']['first_name'], last_name, username, msg['text'], datetime.fromtimestamp(msg['date'])))
-    except KeyError:
-        log.write("Name: {0} {1}\nUsername: {2}\nText: {3}\nTime: {4}\n\n".format(msg['from']['first_name'], last_name, username, "~NO TEXT~", datetime.fromtimestamp(msg['date'])))
+    log.write("Name: {0} {1}\nUsername: {2}\nText: {3}\nTime: {4}\n\n".format(msg['from']['first_name'], last_name, username, msg['text'], datetime.fromtimestamp(msg['date'])))
     log.flush()
     try:
         if msg['from']['id'] == 467782371:
@@ -917,8 +935,11 @@ def start(msg):
         users[chat_id] = 0
     if content_type == "text" and msg['text'] == "/start":
      try:
-        sendPhoto(chat_id, open("example.png", "rb"), caption=translate(languag[chat_id], base64.b64decode("15zXl9elINei15wg15TXm9ek16rXldeo15nXnSDXm9eT15kg15zXl9ek16kg16nXmdeo15nXnSDXkNec15HXldee15nXnSDXkNeVINeQ157XoNeZ150uXG7XoC7XkSwg15bXm9eV16gg16nXoNeZ16rXnyDXnNeU16nXqtee16kg15HXkdeV15gg15HXkNee16bXoteV16og15TXp9ec15PXqiBAINeR15vXnCDXpifXkNeYLCDXldeR15fXmdeo16ogRGVlemVyX3Nwb3RpZnlfYm90Llxu16nXmdee15XXqSDXnteU16DXlCHwn5iM")))
+        sendPhoto(chat_id, open("example.png", "rb"), caption=translate(languag[chat_id], """ברוכים הבאים אל @Deezer_spotify_bot
+ליחצו על '/' כדי לקבל את רשימת הפקודות.
+תהנו!!😃"""))
      except FileNotFoundError:
+        print("no file found")
         pass
      if languag[chat_id] == strings.default_language:
          artist_str, album_str = strings.inline_kboard_artist, strings.inline_kboard_album
@@ -944,6 +965,7 @@ def start(msg):
             if languag[chat_id] == msg['from']['language_code']:
                 languag[chat_id] = strings.second_language
                 change_lan(chat_id, strings.second_language)
+                sendMessage(chat_id, translate(languag[chat_id], strings.will_use_english))
             else:
                 languag[chat_id] = msg['from']['language_code']
                 change_lan(chat_id, msg['from']['language_code'])
@@ -998,11 +1020,11 @@ def start(msg):
             sendMessage(chat_id, translate(languag[chat_id], strings.press),
                     reply_markup=InlineKeyboardMarkup(
                                 inline_keyboard=[
-                                               [InlineKeyboardButton(text=strings.search_by_artist,
+                                               [InlineKeyboardButton(text=translate(languag[chat_id], strings.search_by_artist),
                                                                      switch_inline_query_current_chat=artist_str + msg['text']),
-                                                InlineKeyboardButton(text=strings.search_by_album,
+                                                InlineKeyboardButton(text=translate(languag[chat_id], strings.search_by_album),
                                                                      switch_inline_query_current_chat=album_str + msg['text'])],
-                                               [InlineKeyboardButton(text=strings.global_search,
+                                               [InlineKeyboardButton(text=translate(languag[chat_id], strings.global_search),
                                                                      switch_inline_query_current_chat=msg['text'])]
                                 ]
                    ))
@@ -1029,6 +1051,8 @@ try:
                     shutil.rmtree(loc_dir + a)
                 except NotADirectoryError:
                     pass
+                except Exception as e:
+                    print("Exception" + str(e))
 
 except KeyboardInterrupt:
     #print("here")
@@ -1043,7 +1067,7 @@ finally:
         #url = "https://api.telegram.org/bot" + token + "/sendDocument?chat_id=455941946"
         #data = {
         #    "chat_id": 455941946
-        #}
+    try:    #}
         os.rmdir(loc_dir)
         print("\nנעצר")
         log.close()
@@ -1051,3 +1075,5 @@ finally:
         #requests.post(url, files=a)
         bot.sendDocument(chat_id=455941946, document=a)
         #log.close()
+    except:
+        pass
