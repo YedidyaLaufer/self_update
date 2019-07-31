@@ -71,7 +71,7 @@ will_download_in_quality = "השירים יורדו באיכות "
 best_quality_available = "שירים שלא יוכלו לרדת באיכות שהגדרת, יורדו באיכות הטובה ביותר האפשרית"
 
 
-about = "גרסה: 1.3 Laufer\nשם: @Deezer_spotify_bot\nיוצר: @Yedidya012\nמשתמשים: "
+about = "גרסה: 1.3 Laufer\nשם: @Deezer_spotify_bot\nיוצר:  ידידיה לאופר- @Hebrew_Telegram\nבחסות: @David_chai_laloum\nמשתמשים: "
 total_downloads = 'סה"כ הורדות: '
 
 press = "לחץ"
