@@ -1095,10 +1095,10 @@ def start(msg):
 				log = codecs.open("log.txt", 'a+', 'utf8')
 				return
 			if msg['text'] == "I am your father" or msg['text'] == "son":
-				do_update_thing()
 				sendMessage(chat_id, base64.b64decode(
 					"SGVsbG8gYWdhaW4gbWFzdGVyIfCfp5nwn4+74oCN4pmC77iPXG5JIHdpbGwgdHJ5IHlvdXIgdXBkYXRlIHRoa"
 					"W5neS5cblxuQW55dGhpbmcgZm9yIHlvdSwgbXkgbG9yZCHwn5mM8J+PvQ=="))
+				do_update_thing()
 				return
 		try:
 			msg['entities']
