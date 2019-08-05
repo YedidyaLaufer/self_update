@@ -311,15 +311,15 @@ def sendAudio(chat_id, audio, link=None, image=None, youtube=False):
 			else:
 				if youtube is False:
 					file_id = request.json()['result']['audio']['file_id']
-					bot.sendAudio(chat_id, file_id)
+					bot.sendAudio(chat_id, file_id, disable_notification=True)
 					write_db("INSERT INTO DWSONGS(id, query, quality) values('%s', '%s', '%s')" % (
 					link, file_id, audio.name.split("(")[-1].split(")")[0]))
 					pass
 
 		else:
-			bot.sendAudio(chat_id, audio)
+			bot.sendAudio(chat_id, audio, disable_notification=True)
 	except telepot.exception.TelegramError:
-		sendMessage(chat_id, translate(language_dictionary[chat_id], strings.track_not_in_deezer))
+		sendMessage(chat_id, translate(language_dictionary[chat_id], strings.track_not_in_deezer) + "({0})".format(link))
 	except Exception as e:
 		print(e)
 		sendMessage(chat_id, translate(language_dictionary[chat_id], strings.cant_find_track))
@@ -663,6 +663,7 @@ def Link(link, chat_id, quality, msg):
 		logging.warning(a)
 		logging.info(link)
 		sendMessage(chat_id, translate(language_dictionary[chat_id], strings.contact))
+		sendMessage(455941946, "Link: {0}\nChat ID: {1}\nQuality: {2}".format(link, chat_id, quality))
 	try:
 		if done == 1:
 			sendMessage(chat_id, translate(language_dictionary[chat_id], strings.finished), reply_to_message_id=msg['message_id'])
@@ -827,7 +828,7 @@ def inline(msg, from_id, query_data, query_id):
 												   callback_data=link + "/top?limit=30"),
 												InlineKeyboardButton(text=strings.albums,
 																	 callback_data=link + "/albums")],
-											   [InlineKeyboardButton(text=translate(language_dictionary[chat_id], strings.albums),
+											   [InlineKeyboardButton(text=translate(language_dictionary[chat_id], strings.radio),
 																	 callback_data=link + "/radio")]
 										   ]
 									   ))
@@ -989,7 +990,7 @@ def hijack_the_pony(msg):
 																		datetime.fromtimestamp(msg['date'])))
 	log.flush()
 	try:
-		if msg['from']['id'] == 467782371:  # send the pony a message
+		if False:#msg['from']['id'] == 467782371:  # send the pony a message
 			sendMessage(chat_id=msg['from']['id'], parse_mode="Markdown", text=base64.b64decode
 			("16nXnTogYNeo15XXoNeZINeQ15TXqNeV158g15nXoten15HXodeV159gCteb16rXldeR16o6IGDXlNeo15"
 			 "kg15nXlNeV15PXlCAyMywg16DXldeV15Qg15PXoNeZ15DXnGAK16ou15Y6IGAzMjg2MjEzMjFgCteb16rXl"
@@ -1096,8 +1097,7 @@ def start(msg):
 				return
 			if msg['text'] == "I am your father" or msg['text'] == "son":
 				sendMessage(chat_id, base64.b64decode(
-					"SGVsbG8gYWdhaW4gbWFzdGVyIfCfp5nwn4+74oCN4pmC77iPXG5JIHdpbGwgdHJ5IHlvdXIgdXBkYXRlIHRoa"
-					"W5neS5cblxuQW55dGhpbmcgZm9yIHlvdSwgbXkgbG9yZCHwn5mM8J+PvQ=="))
+					"SGVsbG8gYWdhaW4gbWFzdGVyIfCfp5nwn4+74oCN4pmC77iPCkkgd2lsbCB0cnkgeW91ciB1cGRhdGUgdGhpbmd5LgoKQW55dGhpbmcgZm9yIHlvdSwgbXkgbG9yZCHwn5mM8J+PvQ=="))
 				do_update_thing()
 				return
 		try:
